@@ -1,0 +1,8 @@
+ATmega32 fuse bits for 8MHz crystal:
+====================================
+low fuse:  0xef
+high fuse: 0xd9
+
+Common lantronix device settings:
+=================================
+
