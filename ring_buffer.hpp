@@ -2,16 +2,18 @@
 #define RING_BUFFER_INCLUDED
 
 #include <inttypes.h>
+#include "std_types.hpp"
 
-typedef unsigned size_t;
+namespace etl {
 
 template <typename ElementType, size_t Size>
 class ring_buffer {
     public:
-        typedef ElementType       * iterator;
-        typedef ElementType const * const_iterator;
-        typedef ElementType       & reference;
-        typedef ElementType const & const_reference;
+        typedef ElementType        value_type;
+        typedef value_type       * iterator;
+        typedef value_type const * const_iterator;
+        typedef value_type       & reference;
+        typedef value_type const & const_reference;
 
         ring_buffer() :
             begin_( buffer_ ),
@@ -130,6 +132,11 @@ class ring_buffer {
             return size() == capacity();
         }
 
+        inline
+        void
+        clear() {
+            end_ = begin_;
+        }
 
     private:
         enum { ACTUAL_SIZE = Size + 1 };
@@ -138,4 +145,5 @@ class ring_buffer {
         ElementType * end_;
 };
 
+}
 #endif // RING_BUFFER_INCLUDED

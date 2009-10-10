@@ -36,4 +36,8 @@ enum {
 #define DEBUG_DDR  DDRC
 #define DEBUG_PIN  PC1
 
+#define DTR_PORT PORTB
+#define DTR_DDR  DDRB
+#define DTR      PB0
+
 #endif // POWERBAR_CONFIG_INCLUDED

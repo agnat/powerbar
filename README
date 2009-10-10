@@ -1,8 +1,34 @@
-ATmega32 fuse bits for 8MHz crystal:
+powerbar is a multi socket with a network interface. The sockets are switchable
+using 
+
+Compiling the code:
+===================
+mkdir _build
+cd _build
+cmake -DCMAKE_TOOLCHAIN_FILE=../powerbar/toolchain-avr-gcc.cmake  ../powerbar
+
+Fuse bits:
 ====================================
 low fuse:  0xef
 high fuse: 0xd9
 
 Common lantronix device settings:
 =================================
+
+Configurable Pins:
+    CP1: Modem Control Out
+
+Connection:
+    Disconnect Mode: on DTR 
+
+TODOs for revision 0.2:
+=======================
+    - GPIO should be named DTR
+    - old DTR should be named DCD
+    - DCD should be connected to INT0 or INT1
+    - rotate WiPort footprint
+    - rotate clamps on relay board
+    - move more SMD parts to the top side
+    - narrow boards by approx. 0.5mm
+    - make COM_RST pull-up a pull-down
 

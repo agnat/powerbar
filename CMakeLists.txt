@@ -5,6 +5,7 @@ add_avr_executable(
     main.cpp 
     relay_controller.cpp relay_controller.hpp 
     user_interface.cpp user_interface.hpp
+    command_handler.cpp command_handler.hpp
 )
 
 

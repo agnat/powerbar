@@ -4,9 +4,10 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+#include "command_handler.hpp"
+
 #include "user_interface.hpp"
 #include "relay_controller.hpp"
-#include "command_handler.hpp"
 
 powerbar::relay_controller relay_ctl;
 powerbar::user_interface   ui;
@@ -16,8 +17,12 @@ powerbar::command_handler::buffer_type & input_buffer = cmd_handler.input_buffer
 ISR(TIMER0_COMP_vect) {
     relay_ctl.tick();
     ui.tick();
+    cmd_handler.tick();
 }
 
+ISR(INT2_vect) {
+    cmd_handler.on_connection_established();
+}
 
 ISR(USART_RXC_vect) {
     char c = UDR;
@@ -52,6 +57,14 @@ init() {
 
     COM_RESET_DDR |= _BV( COM_RESET );
     COM_RESET_PORT |= _BV( COM_RESET ); // release com device reset line
+
+    // configure INT2 as our carrier detect pin (DCD)
+    MCUCSR &= ~_BV(ISC2); // trigger on falling edge
+    GICR |= _BV(INT2);
+    GIFR |= _BV(INTF2);
+
+    // configure DTR pin
+    DTR_DDR  |= _BV(DTR);
 
     DEBUG_DDR |= _BV(DEBUG_PIN);
 
