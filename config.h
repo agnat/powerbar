@@ -34,7 +34,7 @@ enum {
 
 #define DEBUG_PORT PORTC
 #define DEBUG_DDR  DDRC
-#define DEBUG_PIN  PC1
+#define DEBUG_BIT  PC1
 
 #define DTR_PORT PORTB
 #define DTR_DDR  DDRB

@@ -14,4 +14,4 @@ user_interface::user_interface() :
     LED_PORT &= ~ALL_BITS;
 }
 
-}
+} // end of namespace powerbar

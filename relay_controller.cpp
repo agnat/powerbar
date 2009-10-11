@@ -4,10 +4,9 @@
 
 namespace powerbar {
 
-relay_controller::relay_controller() :
+relay_controller::relay_controller(model & m) :
+    model_(m),
     pulse_state_(IDLE),
-    relay_state_(),
-    target_relay_state_(),
     current_bit_index_(),
     relays_to_toggle_(),
     pulse_timer_(),
@@ -18,4 +17,4 @@ relay_controller::relay_controller() :
 
 }
 
-}
+} // end of namespace powerbar

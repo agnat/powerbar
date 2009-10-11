@@ -145,5 +145,5 @@ class ring_buffer {
         ElementType * end_;
 };
 
-}
+} // end of namespace etl
 #endif // RING_BUFFER_INCLUDED

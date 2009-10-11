@@ -1,7 +1,11 @@
 #ifndef ETL_STATIC_STRING_INCLUDED
 #define ETL_STATIC_STRING_INCLUDED
 
-#include "std_types.hpp"
+//#include "std_types.hpp"
+
+#include <stddef.h>
+#include <string.h>
+#include <avr/pgmspace.h>
 
 namespace etl {
 
@@ -15,11 +19,11 @@ class static_string {
         typedef value_type       & reference;
         typedef value_type const & const_reference;
 
+        enum {npos = size_t(-1)};
+
         static_string():
             end_(buffer_)
-        {
-            *end_ = CharT();
-        }
+        {}
 
         inline
         iterator
@@ -61,12 +65,12 @@ class static_string {
         void
         append(value_type e) {
             *(end_++) = e;
-            *end_ = CharT();
         }
 
         inline
         iterator
         c_str() {
+            *end_ = value_type();
             return begin();
         }
 
@@ -74,12 +78,54 @@ class static_string {
         void
         clear() {
             end_ = buffer_;
-            *end_ = value_type();
+        }
+        
+        inline
+        size_t
+        size() const {
+            return end_ - buffer_;
+        }
+
+        inline
+        size_t
+        capacity() const {
+            return Capacity;
+        }
+        
+        inline
+        bool
+        empty() const {
+            return end_ == buffer_;
+        }
+
+        inline
+        bool
+        full() const {
+            return size() == capacity();
+        }
+
+        inline
+        size_t
+        find(const value_type * str) {
+            char * match = strstr(c_str(), str);
+            if (match) {
+                return match - begin();
+            }
+            return npos;
+        }
+        inline
+        size_t
+        find_P(PGM_P str) {
+            char * match = strstr_P(c_str(), str);
+            if (match) {
+                return match - begin();
+            }
+            return npos;
         }
     private:
         value_type buffer_[Capacity+1];
         iterator   end_;
 };
 
-}
+} // end of namespace etl
 #endif // ETL_STATIC_STRING_INCLUDED

@@ -55,6 +55,6 @@ class user_interface {
         volatile uint8_t events_;
 };
 
-}
+} // end of namespace powerbar
 
 #endif // POWERBAR_USER_INTERFACE_INCLUDED

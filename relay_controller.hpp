@@ -1,12 +1,14 @@
 #ifndef POWERBAR_RELAY_CONTROLLER_INCLUDED
 #define POWERBAR_RELAY_CONTROLLER_INCLUDED
 
+#include "model.hpp"
+
 namespace powerbar {
 
 class relay_controller {
     public:
 
-        relay_controller();
+        relay_controller(model & m);
 
         inline
         void
@@ -18,16 +20,13 @@ class relay_controller {
             }
             switch (pulse_state_) {
                 case IDLE:
-                    if (relay_state_ != target_relay_state_) {
-                        relays_to_toggle_ = relay_state_ ^ target_relay_state_;
+                    if (relays_to_toggle_) {
                         current_bit_index_ = 0;
                         set_state(TRIGGER_PULSE);
                     }
                     break;
                 case TRIGGER_PULSE:
-                    if (target_relay_state_ == relay_state_) {
-                        set_state(IDLE);
-                    } else {
+                    if (relays_to_toggle_) {
                         while ( ! bit_is_set(relays_to_toggle_, current_bit_index_)) {
                             ++current_bit_index_;
                         }
@@ -36,6 +35,8 @@ class relay_controller {
                             pulse_timer_ = PULSE_WIDTH;
                             set_state(IN_PULSE);
                         }
+                    } else {
+                        set_state(IDLE);
                     }
                     break;
                 case IN_PULSE:
@@ -43,11 +44,7 @@ class relay_controller {
                         uint8_t mask = _BV(current_bit_index_);
                         RELAY_PORT &= ~(mask << 3);
                         off_cycle_timers_[current_bit_index_] = MIN_OFF_CYCLE;
-                        if (target_relay_state_ & mask) {
-                            relay_state_ |= mask;
-                        } else {
-                            relay_state_ &= ~ mask;
-                        }
+                        model_.on_relay_toggled(current_bit_index_);
                         relays_to_toggle_ &= ~mask;
                         set_state(TRIGGER_PULSE);
                     } else {
@@ -58,30 +55,19 @@ class relay_controller {
         }
 
         inline
-        void
-        set_all_relays(uint8_t mask) {
-            while( ! is_idle() ) {};
-            if (mask != relay_state_) {
-                target_relay_state_ = mask;
-            }
-        }
-        inline
         volatile bool
         is_idle() {
-            return target_relay_state_ == relay_state_ && pulse_state_ == IDLE;
+            return relays_to_toggle_ == 0 && pulse_state_ == IDLE;
         }
         inline
         void
         toggle(uint8_t mask) {
             while( ! is_idle() ) {};
-            set_all_relays( relay_state_ ^ mask);
-        }
-        inline
-        uint8_t
-        current_state() const {
-            return relay_state_;
+            relays_to_toggle_ = mask;
         }
     private:
+        relay_controller(relay_controller const& other);
+
         enum { 
             PULSE_WIDTH = 20,
             MIN_OFF_CYCLE = 180
@@ -98,16 +84,14 @@ class relay_controller {
             pulse_state_ = theState;
         }
 
+        model & model_;
         volatile PulseState pulse_state_;
 
-        volatile uint8_t relay_state_;
-        volatile uint8_t target_relay_state_;
-
         uint8_t current_bit_index_;
-        uint8_t relays_to_toggle_;
+        volatile uint8_t relays_to_toggle_;
         uint8_t pulse_timer_;
         uint8_t off_cycle_timers_[NUM_RELAYS];
 };
 
-}
+} // end of namespace powerbar
 #endif // POWERBAR_RELAY_CONTROLLER_INCLUDED
