@@ -1,11 +1,10 @@
-powerbar is a multi socket with a network interface. The sockets are switchable
-using 
-
 Compiling the code:
 ===================
 mkdir _build
 cd _build
 cmake -DCMAKE_TOOLCHAIN_FILE=../powerbar/toolchain-avr-gcc.cmake  ../powerbar
+make
+make upload_powerbar
 
 Fuse bits:
 ====================================
@@ -16,10 +15,21 @@ Common lantronix device settings:
 =================================
 
 Configurable Pins:
-    CP1: Modem Control Out
+    CP0: GPIO (unused)
+    CP1: Modem Control Out (DCD)
+    CP2: Modem Control In  (DTR)
 
 Connection:
     Disconnect Mode: on DTR 
+
+Serial Settings:
+    Baudrate: 38400
+
+Errata for rev. 0.1
+===================
+    - GPIO is not connected to WiPort; Connection management does not work
+    - terminals on relay board have wrong orientation
+
 
 TODOs for revision 0.2:
 =======================
@@ -27,7 +37,7 @@ TODOs for revision 0.2:
     - old DTR should be named DCD
     - DCD should be connected to INT0 or INT1
     - rotate WiPort footprint
-    - rotate clamps on relay board
+    - rotate terminals on relay board
     - move more SMD parts to the top side
     - narrow boards by approx. 0.5mm
     - make COM_RST pull-up a pull-down

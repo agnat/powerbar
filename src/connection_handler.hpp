@@ -158,10 +158,12 @@ class connection_handler {
         }
 
         void process_command();
+        void print_status_line();
 
         inline void do_quit();
         inline void do_toggle();
         inline void do_status();
+        inline void do_rename();
 
         model &          model_;
         buffer_type      input_buffer_;
