@@ -25,7 +25,8 @@ connection_handler::connection_handler(model & m, relay_controller & rc) :
 
     // configure DTR pin
     DTR_DDR  |= _BV(DTR);
-    set_connection_state(DISCONNECTED);
+    //set_connection_state(DISCONNECTED); // keep TCP connection through MCU resets
+    set_connection_state(DISCONNECTING); // pulse DTR to quit TCP connection
 }
 
 void
@@ -128,12 +129,10 @@ inline
 void
 connection_handler::do_status() {
     char name_buffer[model::MAX_NAME_LENGTH];
-    if(cmd_buffer_.size() == 8) {
-        for (uint8_t i = 0; i < NUM_RELAYS; ++i) {
-            model_.get_name(i, name_buffer, model::MAX_NAME_LENGTH);
-            fprintf_P(&cout_, PSTR("%d: %s %S\n"), i+1, name_buffer,
-                    state_string(_BV(i) & model_.socket_state()));
-        }
+    for (uint8_t i = 0; i < NUM_RELAYS; ++i) {
+        model_.get_name(i, name_buffer, model::MAX_NAME_LENGTH);
+        fprintf_P(&cout_, PSTR("%d: %s %S\n"), i+1, name_buffer,
+                state_string(_BV(i) & model_.socket_state()));
     }
 }
 
