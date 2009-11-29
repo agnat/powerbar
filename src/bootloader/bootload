@@ -1,0 +1,121 @@
+#!/usr/bin/ruby
+
+require 'socket'
+
+class GPIO 
+    def initialize(host, port = 0x77f0)
+        @num_io_pins = 3
+        @socket = TCPSocket::new(host, port)
+    end
+
+    def get_pin_functions
+        c  = "" << 0x10
+        c << "\0" * 8
+        return bits_from_response(send_command(c))
+    end
+
+    def get_pin_directions
+        c  = "" << 0x11
+        c << "\0" * 8
+        return bits_from_response( send_command(c))
+    end
+
+    def get_pin_active_levels
+        c  = "" << 0x12
+        c << "\0" * 8
+        return bits_from_response( send_command(c))
+    end
+
+    def get_pin_states
+        c = "" << 0x13
+        c << "\0" * 8
+        return bits_from_response( send_command(c))
+    end
+
+    def set_pin_directions(mask,directions)
+        c = "" << 0x19
+        c << parameter_from_bits(mask)
+        c << parameter_from_bits(directions)
+        return bits_from_response( send_command(c))
+    end
+
+    def set_pin_active_levels(mask,active_levels)
+        c = "" << 0x1a
+        c << parameter_from_bits(mask)
+        c << parameter_from_bits(active_levels)
+        return bits_from_response( send_command(c))
+    end
+
+    def set_pin_states(mask,states)
+        c = "" << 0x1b
+        c << parameter_from_bits(mask)
+        c << parameter_from_bits(states)
+        return bits_from_response( send_command(c))
+    end
+
+    def send_command(cmd)
+        if cmd.length != 9
+            raise "command length must be 9 but is %d" % cmd.length
+        end
+
+        @socket.write(cmd)
+        r = "" << @socket.read(1)
+        if r[0] == 0xff
+            raise "device reported an error"
+        end
+        r << @socket.read(4)
+        if r[0] != cmd[0]
+            raise "command-response mismatch"
+        end
+        return r
+    end
+
+    def bits_from_response(response)
+        num_bytes = (@num_io_pins / 8) + 1
+        result = 0
+        i = 0
+        while i < num_bytes
+            result = (result << 8) + response[i+1]
+            i += 1
+        end
+        return result
+    end
+
+    def parameter_from_bits(bits) 
+        num_bytes = (@num_io_pins / 8) + 1
+        result = ""
+        i = 0
+        while i < num_bytes
+            result << ((bits >> (8*i)) & 0xff)
+            i += 1
+        end
+        result << "\0" * (4 - num_bytes)
+        return result
+    end
+end
+
+def reset_powerbar_mcu(host)
+    gpio = GPIO::new(host)
+    gpio.set_pin_directions(1,1)
+    gpio.set_pin_states(1,1)
+    sleep 0.001
+    gpio.set_pin_states(1,0)
+    gpio.set_pin_directions(1,0)
+end
+
+host = "192.168.2.10"
+reset_powerbar_mcu(host)
+
+
+#gpio = GPIO::new(host)
+#
+#i = 0
+#pin_functions = gpio.get_pin_functions
+#pin_directions = gpio.get_pin_directions
+#pin_active_levels = gpio.get_pin_active_levels
+#pin_states = gpio.get_pin_states
+#print "pin %d is GPIO: %d\n" % [i, pin_functions & (1 << i)]
+#print "pin %d is output: %d\n" % [i, pin_directions & (1 << i)]
+#print "pin %d is active low: %d\n" % [i, pin_active_levels & (1 << i)]
+#print "pin %d has state: %d\n" % [i, pin_states & (1 << i)]
+
