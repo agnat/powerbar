@@ -96,14 +96,19 @@ end
 
 def reset_powerbar_mcu(host)
     gpio = GPIO::new(host)
-    gpio.set_pin_directions(1,1)
-    gpio.set_pin_states(1,1)
+    gpio.set_pin_directions(1,1) # configure as output
+    gpio.set_pin_states(1,1)     # toggle
     sleep 0.001
-    gpio.set_pin_states(1,0)
-    gpio.set_pin_directions(1,0)
+    gpio.set_pin_states(1,0)     # toggle
+    gpio.set_pin_directions(1,0) # configure as input (tristate)
 end
 
-host = "192.168.2.10"
+if ARGV.length < 2
+    puts "Usage: bootload host firmware"
+    exit 1
+end
+
+host = ARGV[0]
 reset_powerbar_mcu(host)
 
 
